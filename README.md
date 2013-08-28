@@ -1,2 +1,2 @@
-Spell_Checker
+Spell Checker
 =============
