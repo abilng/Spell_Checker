@@ -1,5 +1,6 @@
 
 import java.util.List;
+import java.util.Map;
 
 import spellcheck.WordCheck;
 import wordnet.Dictionary;
@@ -12,13 +13,13 @@ public class Main {
 
 	public static void main(String[] args){
 		// TODO Auto-generated method stub\
-		String str = "managemnt";
+		String str = "acreo";
 		dict = new Dictionary();
 		WordCheck wc = new WordCheck(dict);
 		if(! dict.hasWord(str)){
-			List<String> myList = wc.getCorrect(str);
-			for (String string : myList) {
-				System.out.println(string+"  <p>");
+			Map<String, Integer> map = wc.getCorrect(str);
+			for (String string : map.keySet()) {
+				System.out.println(string+"  <"+ map.get(string) +">");
 			}
 		} else {
 			System.out.println("Correct");

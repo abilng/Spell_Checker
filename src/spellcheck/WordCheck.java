@@ -5,8 +5,12 @@ package spellcheck;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
+import corpus.TainedData;
 import wordnet.Dictionary;
 
 /**
@@ -17,10 +21,12 @@ public class WordCheck {
 
 	Dictionary dictionary;
 	ConfusionMatrix cMatrix;
-
+	TainedData trainedData;
+	
 	public WordCheck(Dictionary dictionary) {
 		this.dictionary = dictionary;
 		this.cMatrix = new ConfusionMatrix();
+		this.trainedData = new TainedData();
 	}
 
 	private List<String> edits(final String word) {
@@ -72,7 +78,15 @@ public class WordCheck {
 		}
 	}
 
-	public List<String> getCorrect(final String word){
-		return edits(word);
+	public Map<String,Integer> getCorrect(final String word){
+	     List<String> words = edits(word);
+	     Map<String, Integer> correct = new HashMap<String, Integer>();
+	     int count;
+	     for (String str : words) {
+			count = trainedData.count(str);
+			correct.put(str, count);
+		}
+	     
+	     return correct;
 	}
 }
