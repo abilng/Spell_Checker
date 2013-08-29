@@ -3,38 +3,40 @@
  */
 package wordnet;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.IOException;
 
-import net.didion.jwnl.JWNL;
-import net.didion.jwnl.JWNLException;
-import net.didion.jwnl.dictionary.FileBackedDictionary;
+import edu.mit.jwi.IDictionary;
+import edu.mit.jwi.item.IIndexWord;
+import edu.mit.jwi.item.POS;
 
 /**
  * @author abilng
  *
  */
 public class Dictionary {
-	private static final String WORDNET_CONFIG_FILE = 
-			"/home/abil/workspace/NLP/config/file_properties.xml";
-	private net.didion.jwnl.dictionary.Dictionary dict;
-	
+
+	private static final String WORDNET_DICT = "/usr/share/wordnet/dict";
+	private IDictionary dict;
+
 	public Dictionary() {
 		try {
-			JWNL.initialize(new FileInputStream(WORDNET_CONFIG_FILE));
-		} catch (FileNotFoundException | JWNLException e) {
+			dict = new edu.mit.jwi.Dictionary(
+					new File(WORDNET_DICT));
+			dict.open () ;
+		} catch ( IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		dict = FileBackedDictionary.getInstance();
 	}
 
 	public boolean hasWord(String word){
-			int size = 0;
-			try {
-				size = dict.lookupAllIndexWords(word).size();
-			} catch (JWNLException e) {
-				e.printStackTrace();
-			}	
-			return (size != 0);
+		int size = 0;
+		for ( POS pos:POS.values()){
+			IIndexWord indexWord = dict.getIndexWord(word, pos);
+			if(indexWord == null) continue;
+			return true;
+		}
+		return (size != 0);
 	}
 }

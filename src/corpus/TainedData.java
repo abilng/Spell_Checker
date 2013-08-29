@@ -51,6 +51,7 @@ public class TainedData {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void read(String file) throws IOException, ClassNotFoundException {
 		InputStream buffer;
 		buffer = new BufferedInputStream( new FileInputStream(file));
@@ -86,15 +87,15 @@ public class TainedData {
 		}
 
 		BrownCorpusReader brownCorpusReader = new BrownCorpusReader();
-		
+
 		for (String filename : file_names) {
-			
+
 			try {
 				buffer = new BufferedReader(new FileReader(BROWN_TXT_PATH+filename));
 				System.err.println("Opening :" + filename +"..");
 				brownCorpusReader.getWords(buffer, dataMap);
 				buffer.close();
-				
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -102,8 +103,8 @@ public class TainedData {
 		}
 
 	}
-	
-	
+
+
 	public int count(String word) {
 		Integer ret = dataMap.get(word);
 		if(ret == null) return 0;

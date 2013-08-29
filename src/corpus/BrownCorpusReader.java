@@ -14,7 +14,9 @@ public class BrownCorpusReader {
 	private boolean decapitalizeFirstWord = true;
 
 	private String [] Special_TAGS = {"'","``","''",".","(",")","*","--",",",":",};
-	private String [] POS_TAGS = {
+
+	@SuppressWarnings("unused")
+	private final String [] POS_TAGS = {
 			"ABL","ABN","ABX","AP","AP$","AT",
 			"BE","BED","BEDZ","BEG","BEM","BEN","BER","BEZ",
 			"CC","CD","CD$","CS",
