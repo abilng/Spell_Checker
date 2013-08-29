@@ -105,7 +105,9 @@ public class TainedData {
 	
 	
 	public int count(String word) {
-		return dataMap.get(word);		
+		Integer ret = dataMap.get(word);
+		if(ret == null) return 0;
+		return ret;
 	}
 
 }

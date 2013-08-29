@@ -13,7 +13,7 @@ public class Main {
 
 	public static void main(String[] args){
 		// TODO Auto-generated method stub\
-		String str = "acreo";
+		String str = "belive";
 		dict = new Dictionary();
 		WordCheck wc = new WordCheck(dict);
 		if(! dict.hasWord(str)){

@@ -3,8 +3,10 @@
  */
 package spellcheck;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +55,8 @@ public class WordCheck {
 		for(int i=0; i < word.length(); ++i) {
 			for(char c='a'; c <= 'z'; ++c) {
 				if((i==0 && cMatrix.add('@',c)>0)||
-						(i!=0&&cMatrix.add(word.charAt(i-1),c)>0)) {   
-					String newstr = word.substring(0, i) + String.valueOf(c) + word.substring(i+1);
+						(i!=0&&cMatrix.add(word.charAt(i-1),c)>0)) {
+					String newstr = word.substring(0, i) + String.valueOf(c) + word.substring(i);
 					isValidWord(wordarray,newstr);
 				}
 			}
@@ -64,7 +66,7 @@ public class WordCheck {
 			for(char c='a'; c <= 'z'; ++c) {
 				if(cMatrix.sub(word.charAt(i),c)>0) {
 					String newstr = word.substring(0, i) + String.valueOf(c) +
-							word.substring(i);
+							word.substring(i+1);
 					isValidWord(wordarray,newstr);
 				}
 			}
@@ -86,7 +88,6 @@ public class WordCheck {
 			count = trainedData.count(str);
 			correct.put(str, count);
 		}
-	     
 	     return correct;
 	}
 }
