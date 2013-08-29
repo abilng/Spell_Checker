@@ -37,7 +37,7 @@ class  ConfusionMatrix implements Serializable {
 	public ConfusionMatrix(){
 		try {
 			read(FILE_NAME);
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (Exception e) {
 			System.err.println("Data File Not Found: (" + e.getMessage() + ")");
 			System.err.println("Reading From Text File");
 			del=new int[27][27];
@@ -98,7 +98,7 @@ class  ConfusionMatrix implements Serializable {
 				i++;
 			}
 			buffer.close();
-		} catch(IOException | NumberFormatException ex){
+		} catch(Exception ex){
 			ex.printStackTrace();
 		}     
 	}

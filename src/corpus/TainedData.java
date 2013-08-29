@@ -35,7 +35,7 @@ public class TainedData {
 	public TainedData() {
 		try {
 			read(FILE_NAME);
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (Exception e) {
 			System.err.println("Data File Not Found: (" + e.getMessage() + ")");
 			System.err.println("Reading taining file name from Text File..");
 
@@ -82,7 +82,7 @@ public class TainedData {
 				file_names.add(temp[0]);
 			}
 			buffer.close();
-		} catch(IOException | NumberFormatException ex){
+		} catch(Exception ex){
 			ex.printStackTrace();
 		}
 
