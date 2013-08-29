@@ -24,6 +24,9 @@ public class WordCheck {
 	}
 
 	private List<String> edits(final String word) {
+		
+		//TODO parallel each For
+		
 		final List<String> wordarray = Collections.synchronizedList(new ArrayList<String>());
 
 		for(int i=0; i < word.length(); ++i){//delete i -th element
@@ -64,7 +67,6 @@ public class WordCheck {
 		return wordarray;
 	}
 	private void isValidWord(final List<String> words,final String word) {
-
 		if(dictionary.hasWord(word)){
 			words.add(word);
 		}
