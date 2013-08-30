@@ -12,7 +12,7 @@ public class Main {
 
 	public static void main(String[] args){
 		// TODO Auto-generated method stub\
-		String str = "belive";
+		String str = "comitte";
 		dict = new Dictionary();
 		WordCheck wc = new WordCheck(dict);
 		if(! dict.hasWord(str)){
