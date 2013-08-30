@@ -5,9 +5,16 @@ package spellcheck;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import corpus.TainedData;
 import wordnet.Dictionary;
@@ -22,38 +29,42 @@ public class WordCheck {
 	ConfusionMatrix cMatrix;
 	TainedData trainedData;
 	
+	final static int MAX_EDIT = 3;
+	final static int NO_OF_SUGGESTION = 5;
+
 	public WordCheck(Dictionary dictionary) {
 		this.dictionary = dictionary;
 		this.cMatrix = new ConfusionMatrix();
 		this.trainedData = new TainedData();
 	}
 
-	private List<String> edits(final String word) {
-		
+	private Set<String> edits(final String word,
+			final List<String> allWords) {
+
 		//TODO parallel each For
-		
-		final List<String> wordarray = Collections.synchronizedList(new ArrayList<String>());
+
+		final Set<String> validWords = Collections.synchronizedSet(new HashSet<String>());
 
 		Thread del,rev,ins,sub;
-		
+
 		del = (new Thread() {
 			public void run() {
-				del(word, wordarray,2);
+				del(word, validWords,allWords);
 			}
 		});
 		rev = new Thread() {
 			public void run() {
-				rev(word, wordarray,2);
+				rev(word, validWords,allWords);
 			}
 		};
 		ins = new Thread() {
 			public void run() {
-				ins(word, wordarray,2);
+				ins(word, validWords,allWords);
 			}
 		};
 		sub = new Thread() {
 			public void run() {
-				sub(word, wordarray,2);
+				sub(word, validWords,allWords);
 			}
 		};
 
@@ -61,7 +72,7 @@ public class WordCheck {
 		sub.start();
 		ins.start();
 		rev.start();
-		
+
 		try {
 			sub.join();
 			del.join();
@@ -71,73 +82,124 @@ public class WordCheck {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		return wordarray;
+
+		return validWords;
 	}
 
-	private void sub(final String word, final List<String> wordarray,int edits) {
-		if(edits <= 0) return;
+	private void sub(final String word, final Set<String> validWords,
+			List<String> allWords) {
 		for(int i=0; i < word.length(); ++i) {
 			for(char c='a'; c <= 'z'; ++c) {
 				if(cMatrix.sub(word.charAt(i),c)>0) {
 					String newstr = word.substring(0, i) + String.valueOf(c) +
 							word.substring(i+1);
-					isValidWord(wordarray,newstr);
+					allWords.add(newstr);
+					isValidWord(validWords,newstr);
 				}
 			}
 		}
 	}
 
-	private void ins(final String word, final List<String> wordarray,int edits) {
-		if(edits <= 0) return;
+	private void ins(final String word, final Set<String> validWords,
+			List<String> allWords) {
 		for(int i=0; i < word.length(); ++i) {
 			for(char c='a'; c <= 'z'; ++c) {
 				if((i==0 && cMatrix.add('@',c)>0)||
 						(i!=0&&cMatrix.add(word.charAt(i-1),c)>0)) {
 					String newstr = word.substring(0, i) + String.valueOf(c) + word.substring(i);
-					//System.err.println(newstr);
-					isValidWord(wordarray,newstr);
-					//ins(newstr, wordarray, edits-1);
+					allWords.add(newstr);
+					isValidWord(validWords,newstr);
 				}
 			}
 		}
 	}
 
-	private void rev(final String word, final List<String> wordarray,int edits) {
-		if(edits <= 0) return;
+	private void rev(final String word, final Set<String> validWords,
+			List<String> allWords) {
 		for(int i=0; i < word.length()-1; ++i){
 			if(cMatrix.rev(word.charAt(i),word.charAt(i+1))>0) {
 				String newstr = word.substring(0, i) + word.substring(i+1, i+2) +
 						word.substring(i, i+1) + word.substring(i+2);
-				isValidWord(wordarray,newstr);
+				isValidWord(validWords,newstr);
+				allWords.add(newstr);
 			}
 		}
 	}
 
-	private void del(final String word, final List<String> wordarray,int edits) {
-		if(edits <= 0) return;
+	private void del(final String word, final Set<String> validWords,
+			List<String> allWords) {
+
 		for(int i=0; i < word.length(); ++i){//delete i -th element
 			if((i==0 && cMatrix.del('@',word.charAt(i))>0)||
 					(i!=0 && cMatrix.del(word.charAt(i-1),word.charAt(i))>0)){   
 				String newstr = word.substring(0, i) + word.substring(i+1);
-				isValidWord(wordarray,newstr);	
+				isValidWord(validWords,newstr);
+				allWords.add(newstr);
 			}
 		}
 	}
-	private void isValidWord(final List<String> words,final String word) {
+	private void isValidWord(final Set<String> wordarray,final String word) {
 		if(dictionary.hasWord(word)){
-			words.add(word);
+			wordarray.add(word);
 		}
 	}
 
 	public Map<String,Integer> getCorrect(final String word){
-	     List<String> words = edits(word);
-	     Map<String, Integer> correct = new HashMap<String, Integer>();
-	     int count;
-	     for (String str : words) {
+
+		int count;
+		int editDistance = 1;
+		
+		List<String> allWords = Collections.synchronizedList(new ArrayList<String>());
+		Map<String, Integer> correct = new TreeMap<String, Integer>();
+		Set<String> validWords;
+		
+		
+		validWords = edits(word,allWords);
+		editDistance++;
+		
+		while(validWords.isEmpty() && editDistance <=MAX_EDIT){
+			editDistance++;
+			System.err.println(word+ " "+ allWords.size() + " " + editDistance);
+			Iterator<String> iterator = allWords.iterator();
+			List<String> newAllWords =
+					Collections.synchronizedList(new ArrayList<String>());
+			while(iterator.hasNext()) {
+				String str = iterator.next();
+				iterator.remove();
+				validWords.addAll(edits(str, newAllWords));
+			}
+			allWords = newAllWords;
+		}
+
+		for (String str : validWords) {
 			count = trainedData.count(str);
 			correct.put(str, count);
 		}
-	     return correct;
+		correct = sortByValue(correct);
+		return correct;
 	}
+	
+	static Map<String,Integer> sortByValue(Map<String, Integer> map) {
+	     LinkedList<Entry<String,Integer>> list =
+	    		 new LinkedList<Entry<String,Integer>>(map.entrySet());
+	     Collections.sort(list, new Comparator<Entry<String,Integer>>() {
+			@Override
+			public int compare(Entry<String,Integer> arg0,
+					Entry<String,Integer> arg1) {
+				// reverse Order
+				return Integer.compare(arg1.getValue(), arg0.getValue());
+			}
+	     });
+
+	    Map<String, Integer> result = new LinkedHashMap<String,Integer>();
+	    int cResult = 0;
+	    for (Iterator<?> it = list.iterator(); it.hasNext();) {
+	        @SuppressWarnings("unchecked")
+			Entry<String,Integer> entry = 
+	        		(Entry<String, Integer>) it.next();
+	        result.put(entry.getKey(), entry.getValue());
+	        if ( ++cResult > NO_OF_SUGGESTION ) break;
+	    }
+	    return result;
+	} 
 }
