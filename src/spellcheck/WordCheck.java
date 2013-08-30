@@ -97,7 +97,7 @@ public class WordCheck {
 					String newstr = word.substring(0, i) + String.valueOf(c) + word.substring(i);
 					//System.err.println(newstr);
 					isValidWord(wordarray,newstr);
-					ins(newstr, wordarray, edits-1);
+					//ins(newstr, wordarray, edits-1);
 				}
 			}
 		}
