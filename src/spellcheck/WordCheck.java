@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import corpus.TainedData;
+import corpus.TrainedWords;
 import wordnet.Dictionary;
 
 /**
@@ -27,15 +27,15 @@ public class WordCheck {
 
 	Dictionary dictionary;
 	ConfusionMatrix cMatrix;
-	TainedData trainedData;
+	TrainedWords trainedData;
 	
 	final static int MAX_EDIT = 3;
 	final static int NO_OF_SUGGESTION = 5;
 
-	public WordCheck(Dictionary dictionary) {
+	public WordCheck(Dictionary dictionary, TrainedWords trainedData) {
 		this.dictionary = dictionary;
 		this.cMatrix = new ConfusionMatrix();
-		this.trainedData = new TainedData();
+		this.trainedData = trainedData;
 	}
 
 	private Set<String> edits(final String word,

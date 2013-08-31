@@ -128,9 +128,10 @@ public class BrownCorpusReader {
 		return tag.equals(startTag) ? tag : normalizeTag(tag);
 	}
 	
-	public Map<String, Integer> getWords(BufferedReader reader,
+	public int getWords(BufferedReader reader,
 			Map<String, Integer> dataMap) throws IOException {
 	    String line;
+	    int count= 0;
 	    while ((line = reader.readLine()) != null) {
 	      line = line.trim();
 	      
@@ -159,9 +160,10 @@ public class BrownCorpusReader {
 				Integer val = dataMap.get(word);
 				if(val == null)	dataMap.put(word,1);
 				else dataMap.put(word.toLowerCase(),val + 1);
+				count++;
 	      }
 	    }
-		return dataMap;
+		return count;
 	}
 	
 	private static String replaceCharAt(String str, int pos, char c) {

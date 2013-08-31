@@ -24,10 +24,10 @@ import java.io.Serializable;
  */
 class  ConfusionMatrix implements Serializable {
 	
-	private static final String FILE_NAME = "ConfusionMatrix.dat";
+	private static final String FILE_NAME = "Data/ConfusionMatrix.dat";
 	private static final long serialVersionUID = 1L;
 	
-	private static final String MATRIX_TXT_PATH = "/home/abil/workspace/NLP/data/";
+	private static final String MATRIX_TXT_PATH = "TrainData/";
 	
 	private int del[][];
 	private int add[][];

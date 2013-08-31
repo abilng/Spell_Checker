@@ -24,24 +24,28 @@ import java.util.List;
  * @author abilng
  *
  */
-public class TainedData {
+public class TrainedWords {
 
-	private static final String FILE_NAME = "TranedData.dat";
-
-	private static final String BROWN_TXT_PATH = "/home/abil/workspace/NLP/data/";
-
+	private static final String FILE_NAME = "Data/TranedData.dat";
+	private static final String BROWN_TXT_PATH = "TrainData/";
+	private static final String CAT_FILE = BROWN_TXT_PATH + "cats.txt";
+	
+	private int wordCount;
+	private int vacabulary;
+	
 	Hashtable<String,Integer> dataMap;
 
-	public TainedData() {
+	public TrainedWords() {
 		try {
 			read(FILE_NAME);
+			vacabulary = dataMap.size();
 		} catch (Exception e) {
 			System.err.println("Data File Not Found: (" + e.getMessage() + ")");
 			System.err.println("Reading taining file name from Text File..");
 
 			dataMap = new Hashtable<String, Integer>();
-
-			train();
+			wordCount = 0;
+			train(CAT_FILE);
 
 			try {
 				save(FILE_NAME);
@@ -57,6 +61,7 @@ public class TainedData {
 		buffer = new BufferedInputStream( new FileInputStream(file));
 		ObjectInput input = new ObjectInputStream ( buffer );
 		dataMap = (Hashtable<String, Integer>) input.readObject();
+		wordCount = (Integer) input.readObject();
 		input.close();
 	}
 
@@ -65,10 +70,10 @@ public class TainedData {
 		buffer = new BufferedOutputStream( new FileOutputStream(file));
 		ObjectOutput output = new ObjectOutputStream ( buffer );
 		output.writeObject(dataMap);
+		output.writeObject((Integer)wordCount);
 		output.close();
 	}
-	private void train() {
-		String catfile = BROWN_TXT_PATH + "cats.txt";
+	private void train(String catfile) {	
 		List<String> file_names = new ArrayList<String>();
 		BufferedReader buffer;
 		try
@@ -93,7 +98,7 @@ public class TainedData {
 			try {
 				buffer = new BufferedReader(new FileReader(BROWN_TXT_PATH+filename));
 				System.err.println("Opening :" + filename +"..");
-				brownCorpusReader.getWords(buffer, dataMap);
+				wordCount+= brownCorpusReader.getWords(buffer, dataMap);
 				buffer.close();
 
 			} catch (IOException e) {
@@ -101,7 +106,7 @@ public class TainedData {
 				e.printStackTrace();
 			}
 		}
-
+		vacabulary = dataMap.size();
 	}
 
 
@@ -109,6 +114,11 @@ public class TainedData {
 		Integer ret = dataMap.get(word);
 		if(ret == null) return 0;
 		return ret;
+	}
+	
+	public double prior(String word) {
+		return (count(word)+ 0.5)/(0.5*vacabulary + wordCount);
+		
 	}
 
 }
