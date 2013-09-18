@@ -27,7 +27,7 @@ class  ConfusionMatrix implements Serializable {
 	private static final String FILE_NAME = "Data/ConfusionMatrix.dat";
 	private static final long serialVersionUID = 1L;
 	
-	private static final String MATRIX_TXT_PATH = "TrainData/";
+	private static final String MATRIX_TXT_PATH = "TrainData/CMatrix/";
 	
 	private int del[][];
 	private int add[][];

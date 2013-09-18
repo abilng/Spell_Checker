@@ -139,7 +139,10 @@ public class WordCheck {
 		}
 	}
 	private void isValidWord(final Set<String> wordarray,final String word) {
-		if(dictionary.hasWord(word)){
+//		if(dictionary.hasWord(word)){
+//			wordarray.add(word);
+//		}
+		if(trainedData.count(word)>0){
 			wordarray.add(word);
 		}
 	}

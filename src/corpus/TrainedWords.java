@@ -27,7 +27,7 @@ import java.util.List;
 public class TrainedWords {
 
 	private static final String FILE_NAME = "Data/TranedData.dat";
-	private static final String BROWN_TXT_PATH = "TrainData/";
+	private static final String BROWN_TXT_PATH = "TrainData/Brown/";
 	private static final String CAT_FILE = BROWN_TXT_PATH + "cats.txt";
 	
 	private int wordCount;
