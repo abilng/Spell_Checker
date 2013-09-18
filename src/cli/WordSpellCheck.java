@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import corpus.TrainedWords;
+import corpus.TriGrams;
 import spellcheck.WordCheck;
 import wordnet.Dictionary;
 
@@ -59,6 +60,8 @@ public class WordSpellCheck {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		//TriGrams triGrams = new TriGrams();
+		//triGrams.test2();
 	}
 
 	private static void spellCheck(Dictionary dict, WordCheck wc,
