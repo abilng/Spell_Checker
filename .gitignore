@@ -9,3 +9,5 @@ data/*
 .*
 *.tsv
 TrainData/Brown/*
+/bin
+/bin
