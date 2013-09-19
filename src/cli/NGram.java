@@ -11,13 +11,11 @@ import java.util.Map;
 
 import spellcheck.TrigramCheck;
 import wordnet.Dictionary;
-import corpus.TrainedWords;
-import spellcheck.*;
+
 public class NGram {
 	static String inputFile="input.tsv";
 	static String outputFile="output.tsv";
 	static String marker="<EOL>";
-	private static String [] trigrams;
 	
 	public static String addMarker(String sentence)
 	{
@@ -62,13 +60,13 @@ public class NGram {
 	
 	private static void spellCheck(Dictionary dict, TrigramCheck wc,
 			String curr, BufferedWriter buffer, List<String> words, int i) throws IOException {
-		trigrams = null;
+		StringBuilder trigrams = new StringBuilder();
 		if(! dict.hasWord(curr)){
 			buffer.write(curr +"\t");
-			trigrams[0]=words.get(i-1);
-			trigrams[1]=words.get(i-2);
+			trigrams.append(words.get(i-1));
+			trigrams.append(words.get(i-2));
 			
-			Map<String, Double> map = wc.getCorrect(curr,trigrams);
+			Map<String, Double> map = wc.getCorrect(curr,trigrams.toString());
 
 			for (String string : map.keySet())
 				buffer.write(string+"  <"+ map.get(string) +">\t");
@@ -86,8 +84,8 @@ public class NGram {
 
 		List<String> words = readWords(inputFile);
 		Dictionary dict = new Dictionary();
-		TrainedWords trainedWords = new TrainedWords();
-		TrigramCheck wc = new TrigramCheck(dict,trainedWords);
+		
+		TrigramCheck wc = new TrigramCheck();
 
 		BufferedWriter buffer;
 		try {

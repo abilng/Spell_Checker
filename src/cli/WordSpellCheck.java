@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import corpus.TrainedWords;
-import corpus.TriGrams;
 import spellcheck.WordCheck;
 import wordnet.Dictionary;
 
@@ -47,8 +45,7 @@ public class WordSpellCheck {
 
 		List<String> words = readWords(inputFile);
 		Dictionary dict = new Dictionary();
-		TrainedWords trainedWords = new TrainedWords();
-		WordCheck wc = new WordCheck(dict,trainedWords);
+		WordCheck wc = new WordCheck();
 
 		BufferedWriter buffer;
 		try {
@@ -60,8 +57,6 @@ public class WordSpellCheck {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//TriGrams triGrams = new TriGrams();
-		//triGrams.test2();
 	}
 
 	private static void spellCheck(Dictionary dict, WordCheck wc,

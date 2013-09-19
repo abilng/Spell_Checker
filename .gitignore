@@ -1,13 +1,14 @@
-*.class
-
 # Package Files #
 *.jar
 *.war
 *.ear
-bin/*
-data/*
+
+#class file
+*.class
+
+#others
 .*
 *.tsv
 TrainData/Brown/*
-/bin
-/bin
+Data/*
+bin/*

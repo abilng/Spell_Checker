@@ -1,6 +1,3 @@
-/**
- * 
- */
 package spellcheck;
 
 import java.util.ArrayList;
@@ -17,31 +14,32 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import corpus.TrainedWords;
-import wordnet.Dictionary;
 
-/**
- * @author abilng
- *
- */
 public class WordCheck {
-
-	Dictionary dictionary;
+	/**
+	 * For correct Words ignoring context
+	 */
 	ConfusionMatrix cMatrix;
 	TrainedWords trainedData;
 	
 	final static int MAX_EDIT = 3;
-	final static int NO_OF_SUGGESTION = 5;
+	final static int NO_OF_SUGGESTION = 10;
 
-	public WordCheck(Dictionary dictionary, TrainedWords trainedData) {
-		this.dictionary = dictionary;
+	public WordCheck() {
 		this.cMatrix = new ConfusionMatrix();
-		this.trainedData = trainedData;
+		this.trainedData = new TrainedWords();
 	}
 
+	/**
+	 * Generate words within a single edit distance
+	 * @param word - word to be correct
+	 * @param allWords - all word within a single edit distance (for next recursive call if needed)
+	 * @return all valid word within a single edit distance
+	 */
 	private Set<String> edits(final String word,
 			final List<String> allWords) {
 
-		//TODO parallel each For
+		//parallel each For
 
 		final Set<String> validWords = Collections.synchronizedSet(new HashSet<String>());
 
@@ -49,22 +47,22 @@ public class WordCheck {
 
 		del = (new Thread() {
 			public void run() {
-				del(word, validWords,allWords);
+				delete(word, validWords,allWords);
 			}
 		});
 		rev = new Thread() {
 			public void run() {
-				rev(word, validWords,allWords);
+				reverse(word, validWords,allWords);
 			}
 		};
 		ins = new Thread() {
 			public void run() {
-				ins(word, validWords,allWords);
+				insert(word, validWords,allWords);
 			}
 		};
 		sub = new Thread() {
 			public void run() {
-				sub(word, validWords,allWords);
+				substitute(word, validWords,allWords);
 			}
 		};
 
@@ -79,14 +77,20 @@ public class WordCheck {
 			ins.join();
 			rev.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return validWords;
 	}
 
-	private void sub(final String word, final Set<String> validWords,
+	/**
+	 * 
+	 * Generate words within a single edit distance by single substitute
+	 * @param word - word to be correct
+	 * @param allWords - all word within a single edit distance (for next recursive call if needed)
+	 * @param validWords - valid word within a single edit distance
+	 */
+	private void substitute(final String word, final Set<String> validWords,
 			List<String> allWords) {
 		for(int i=0; i < word.length(); ++i) {
 			for(char c='a'; c <= 'z'; ++c) {
@@ -99,8 +103,15 @@ public class WordCheck {
 			}
 		}
 	}
-
-	private void ins(final String word, final Set<String> validWords,
+	
+	/**
+	 * 
+	 * Generate words by single insert
+	 * @param word - word to be correct
+	 * @param allWords - all word within a single edit distance (for next recursive call if needed)
+	 * @param validWords - valid word within a single edit distance
+	 */
+	private void insert(final String word, final Set<String> validWords,
 			List<String> allWords) {
 		for(int i=0; i < word.length(); ++i) {
 			for(char c='a'; c <= 'z'; ++c) {
@@ -114,7 +125,14 @@ public class WordCheck {
 		}
 	}
 
-	private void rev(final String word, final Set<String> validWords,
+	/**
+	 * 
+	 * Generate words by single reversal
+	 * @param word - word to be correct
+	 * @param allWords - all word within a single edit distance (for next recursive call if needed)
+	 * @param validWords - valid word within a single edit distance
+	 */
+	private void reverse(final String word, final Set<String> validWords,
 			List<String> allWords) {
 		for(int i=0; i < word.length()-1; ++i){
 			if(cMatrix.rev(word.charAt(i),word.charAt(i+1))>0) {
@@ -126,7 +144,14 @@ public class WordCheck {
 		}
 	}
 
-	private void del(final String word, final Set<String> validWords,
+	/**
+	 * 
+	 * Generate words by single delete
+	 * @param word - word to be correct
+	 * @param allWords - all word within a single edit distance (for next recursive call if needed)
+	 * @param validWords - valid word within a single edit distance
+	 */
+	private void delete(final String word, final Set<String> validWords,
 			List<String> allWords) {
 
 		for(int i=0; i < word.length(); ++i){//delete i -th element
@@ -138,15 +163,22 @@ public class WordCheck {
 			}
 		}
 	}
+	/**
+	 * add  'word' to 'wordarray' if word is valid
+	 * @param wordarray
+	 * @param word
+	 */
 	private void isValidWord(final Set<String> wordarray,final String word) {
-//		if(dictionary.hasWord(word)){
-//			wordarray.add(word);
-//		}
 		if(trainedData.count(word)>0){
 			wordarray.add(word);
 		}
 	}
 
+	/**
+	 * 
+	 * @param word word to be corrected
+	 * @return Map of Correct words and its score
+	 */
 	public Map<String,Integer> getCorrect(final String word){
 
 		int count;
@@ -181,6 +213,12 @@ public class WordCheck {
 		correct = sortByValue(correct);
 		return correct;
 	}
+	
+	/**
+	 * For sorting of "Map <String,Integer>" according to  value
+	 * @param map -input map
+	 * @return sorted map
+	 */
 	
 	static Map<String,Integer> sortByValue(Map<String, Integer> map) {
 	     LinkedList<Entry<String,Integer>> list =
