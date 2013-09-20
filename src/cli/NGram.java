@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import corpus.TrainedWords;
-import corpus.TrainedWords;
+import corpus.TrainedData;
 import spellcheck.TrigramCheck;
 import wordnet.Dictionary;
 
@@ -86,10 +85,10 @@ public class NGram {
 
 		List<String> words = readWords(inputFile);
 		Dictionary dict = new Dictionary();
-		TrainedWords trainedWords = new TrainedWords();
-		TrainedWords triGrams = new TrainedWords();
+		TrainedData trainedData = new TrainedData();
+		TrainedData triGrams = new TrainedData();
 		
-		TrigramCheck wc = new TrigramCheck(triGrams,trainedWords);
+		TrigramCheck wc = new TrigramCheck(triGrams,trainedData);
 
 		BufferedWriter buffer;
 		try {

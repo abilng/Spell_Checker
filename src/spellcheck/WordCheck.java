@@ -13,21 +13,21 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import corpus.TrainedWords;
+import corpus.TrainedData;
 
 public class WordCheck {
 	/**
 	 * For correct Words ignoring context
 	 */
 	ConfusionMatrix cMatrix;
-	private TrainedWords trainedData;
+	private TrainedData trainedData;
 	
 	final static int MAX_EDIT = 3;
 	final static int NO_OF_SUGGESTION = 10;
 
-	public WordCheck(TrainedWords trainedWords) {
+	public WordCheck(TrainedData trainedData) {
 		this.cMatrix = new ConfusionMatrix();
-		this.trainedData = trainedWords;
+		this.trainedData = trainedData;
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class WordCheck {
 	 * @param word
 	 */
 	private void isValidWord(final Set<String> wordarray,final String word) {
-		if(trainedData.wordCount(word)>0){
+		if(trainedData.count(word)>0){
 			wordarray.add(word);
 		}
 	}

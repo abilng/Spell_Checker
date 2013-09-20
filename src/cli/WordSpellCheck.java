@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import corpus.TrainedWords;
+import corpus.TrainedData;
 import spellcheck.WordCheck;
 import wordnet.Dictionary;
 
@@ -46,8 +46,8 @@ public class WordSpellCheck {
 
 		List<String> words = readWords(inputFile);
 		Dictionary dict = new Dictionary();
-		TrainedWords trainedWords = new TrainedWords();
-		WordCheck wc = new WordCheck(trainedWords);
+		TrainedData trainedData = new TrainedData();
+		WordCheck wc = new WordCheck(trainedData);
 
 		BufferedWriter buffer;
 		try {

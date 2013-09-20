@@ -26,8 +26,8 @@ public class Dictionary {
 					new File(WORDNET_DICT));
 			dict.open () ;
 		} catch ( IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(2);
 		}
 	}
 
