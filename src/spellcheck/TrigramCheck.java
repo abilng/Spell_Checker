@@ -39,8 +39,8 @@ public class TrigramCheck {
 		{			
 			currTrigram=history+" "+entry.getKey();
 			currBigram=prevWords[1]+" "+entry.getKey();
-			trigramMap.put(currTrigram, getScore(currTrigram,history));
-			bigramMap.put(currBigram, getScore(currBigram,history));
+			trigramMap.put(currTrigram, getScore(currTrigram));
+			bigramMap.put(currBigram, getScore(currBigram));
 		}
 		trigramMap=sortByValue(trigramMap);
 		bigramMap=sortByValue(bigramMap);
@@ -56,9 +56,19 @@ public class TrigramCheck {
 	 * @param history 
 	 * @return score (probability) of Trigram
 	 */
-	private double getScore(String trigram, String history) {
+	private double getScore(String trigram) {
+		
+		String [] words=trigram.split(" ");
+		String history=null;
+		int n=words.length-1;
+		if(n==0)
+			return wc.trainedData.prior(trigram);
+		for(int i=0;i<n;i++)
+			history=history+" "+words[i];
+		double term=1;
+		
 
-		return (trainedTrigrams.prior(trigram)/trainedTrigrams.prior(history));
+		return (trainedTrigrams.prior(trigram)*getScore(history));
 	}
 	/**
 	 * Normalize scores
