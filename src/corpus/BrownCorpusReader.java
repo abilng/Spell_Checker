@@ -1,7 +1,7 @@
 package corpus;
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.lang.invoke.ConstantCallSite;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -38,6 +38,11 @@ public class BrownCorpusReader {
 
 	}
 
+	/**
+	 * 
+	 * @param line
+	 * @return return list of {@link TaggedWord} produced from a brown corpus
+	 */
 	public List<TaggedWord>  getTaggedWords(String line){
 		line = line.trim();
 		if (line.length() == 0)
@@ -131,7 +136,14 @@ public class BrownCorpusReader {
 		// multiple runs to normalize
 		return tag.equals(startTag) ? tag : normalizeTag(tag);
 	}
-
+	
+	/**
+	 * get (word,count) from a tagged file.
+	 * @param reader {@link FileReader} of tagged file 
+	 * @param dataMap Map of (word,count)
+	 * @return total number of words
+	 * @throws IOException
+	 */
 	public int getWords(BufferedReader reader,
 			Map<String, Integer> dataMap) throws IOException {
 		String line;
@@ -144,21 +156,25 @@ public class BrownCorpusReader {
 
 			String[] lineParts = line.split("\\s+");
 			for (int i = 0; i < lineParts.length; ++i) {
-				String wordTag = lineParts[i];
+				String taggedWord = lineParts[i];
 
 				// Get the word and tag.
-				int sepIndex = wordTag.lastIndexOf('/');
+				int sepIndex = taggedWord.lastIndexOf('/');
 
 				if (sepIndex == -1) {
 					System.err.println("Tag is missing in '" +
-							wordTag + "'");
+							taggedWord + "'");
 					continue;
 				}
-				String word = wordTag.substring(0, sepIndex);
+				String tag = normalizeTag(taggedWord.substring(sepIndex));
+				if(isSpecialTag(tag)) {
+					continue;
+				}
+				String word = taggedWord.substring(0, sepIndex);
 
 				if (word.length() == 0) {
 					System.err.println("Zero-length word in '" +
-							wordTag + "'");
+							taggedWord + "'");
 					continue;
 				}
 				Integer val = dataMap.get(word);
@@ -169,15 +185,15 @@ public class BrownCorpusReader {
 		}
 		return count;
 	}
-
-	private static String replaceCharAt(String str, int pos, char c) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(str.substring(0, pos));
-		sb.append(c);
-		sb.append(str.substring(pos + 1));
-		return sb.toString();
-	}
-
+	
+	/**
+	 * get (n-gram,count) from a tagged file.
+	 * @param reader {@link FileReader} of tagged file 
+	 * @param dataMap Map of (n-gram,count)
+	 * @param n - n-gram order
+	 * @return total number of words
+	 * @throws IOException
+	 */
 	public int getNWords(BufferedReader reader, int n,
 			Hashtable<String, Integer> dataMap) throws IOException {
 		String line;
@@ -198,24 +214,24 @@ public class BrownCorpusReader {
 					lineStart = false;
 				}
 
-				String TaggedWord = lineParts[i];
+				String taggedWord = lineParts[i];
 				// Get the word and tag.
-				int sepIndex = TaggedWord.lastIndexOf('/');
+				int sepIndex = taggedWord.lastIndexOf('/');
 
 				if (sepIndex == -1) {
 					System.err.println("Tag is missing in '" +
-							TaggedWord + "'");
+							taggedWord + "'");
 					continue;
 				}
 				
-				String tag = normalizeTag(TaggedWord.substring(sepIndex));
+				String tag = normalizeTag(taggedWord.substring(sepIndex));
 
 				
-				String word = TaggedWord.substring(0, sepIndex);
+				String word = taggedWord.substring(0, sepIndex);
 
 				if (word.length() == 0) {
 					System.err.println("Zero-length word in '" +
-							TaggedWord + "'");
+							taggedWord + "'");
 					continue;
 				}
 				
@@ -252,6 +268,11 @@ public class BrownCorpusReader {
 		return count;
 	}
 
+	/**
+	 * Check if given tag is special tag or not
+	 * @param tag
+	 * @return {@link Boolean}
+	 */
 	private boolean isSpecialTag(String tag) {
 		
 		for(String str: Special_TAGS){
@@ -259,5 +280,14 @@ public class BrownCorpusReader {
 				return true;
 		}
 		return false;
+	}
+	
+
+	private static String replaceCharAt(String str, int pos, char c) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(str.substring(0, pos));
+		sb.append(c);
+		sb.append(str.substring(pos + 1));
+		return sb.toString();
 	}
 }
