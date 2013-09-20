@@ -25,7 +25,7 @@ public class WordSpellCheck {
 		{
 			buffer = new BufferedReader(new FileReader(file));   
 			String line, temp[];
-
+			System.err.println("Reading input file: "+file);
 			while ((line = buffer.readLine())!= null){
 				temp = line.split(" "); //split spaces
 
@@ -53,6 +53,7 @@ public class WordSpellCheck {
 			for (String str : words) {
 				spellCheck(dict, wc, str,buffer);	
 			}
+			System.err.println("Saving output file:"+ouputFile);
 			buffer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -63,10 +64,13 @@ public class WordSpellCheck {
 			String str, BufferedWriter buffer) throws IOException {
 		if(! dict.hasWord(str)){
 			buffer.write(str +"\t");
-			Map<String, Integer> map = wc.getCorrect(str);
+			Map<String, Double> map = wc.getCorrect(str);
 
-			for (String string : map.keySet())
-				buffer.write(string+"  <"+ map.get(string) +">\t");
+			for (Map.Entry<String, Double> entry : map.entrySet()) {
+				String newWord = entry.getKey();
+				String score = String.format("%.2f",entry.getValue()*100);
+				buffer.write(newWord+"  <" + score + ">\t");
+		    }			
 
 			buffer.newLine();
 		} else {

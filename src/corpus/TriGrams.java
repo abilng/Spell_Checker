@@ -18,6 +18,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class TriGrams {
 	private static final String FILE_NAME = "Data/TrigramData.dat";
@@ -129,24 +130,6 @@ public class TriGrams {
 		//TODO
 		return 0;
 		
-	}
-	
-	public void test3(){
-		 Iterator it = trigramTable.entrySet().iterator();
-		    while (it.hasNext()) {
-		       Map.Entry pairs = (Map.Entry)it.next();
-		        System.out.println(pairs.getKey() + " = " + pairs.getValue());
-		        it.remove(); // avoids a ConcurrentModificationException
-		    }
-	}
-	public void test2(){
-		System.err.println("test");
-		 Iterator it = bigramTable.entrySet().iterator();
-		    while (it.hasNext()) {
-		       Map.Entry pairs = (Map.Entry)it.next();
-		        System.out.println(pairs.getKey() + " = " + pairs.getValue());
-		        it.remove(); // avoids a ConcurrentModificationException
-		    }
 	}
 	
 }
