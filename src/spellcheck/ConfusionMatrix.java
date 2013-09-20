@@ -18,6 +18,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+import config.Properties;
+
 /**
  * @author abilng
  *
@@ -27,7 +29,7 @@ class  ConfusionMatrix implements Serializable {
 	private static final String FILE_NAME = "Data/ConfusionMatrix.dat";
 	private static final long serialVersionUID = 1L;
 	
-	private static final String MATRIX_TXT_PATH = "TrainData/CMatrix/";
+	private static final String MATRIX_TXT_PATH = Properties.CMATIX_PATH;
 	
 	private int del[][];
 	private int add[][];

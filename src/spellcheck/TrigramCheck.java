@@ -9,19 +9,20 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import corpus.TriGrams;
+import corpus.TrainedWords;
+import corpus.TrainedWords;
 
 public class TrigramCheck {
 	private static final int NO_OF_SUGGESTION = 10;
 	WordCheck wc;
-	TriGrams trainedTrigrams;
+	TrainedWords trainedTrigrams;
 	
 	
 
-	public TrigramCheck() {
+	public TrigramCheck(TrainedWords triGrams,TrainedWords trainedWords) {
 		// TODO Auto-generated constructor stub
-		trainedTrigrams=new TriGrams();
-		wc=new WordCheck();
+		trainedTrigrams= triGrams;
+		wc=new WordCheck(trainedWords);
 		
 	}
 	/**
