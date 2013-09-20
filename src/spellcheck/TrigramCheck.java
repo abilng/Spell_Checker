@@ -2,6 +2,7 @@ package spellcheck;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,34 +33,37 @@ public class TrigramCheck {
 	 */
 	public  Map<String,Double> getCorrect(String word,String history){
 				
-		Map<String, Double> trigramMap = null,bigramMap = null,ngramMap=null;
-		Map<String, Double> validWordMap = wc.getCorrect(word);
-		String currBigram,currTrigram;
-		String [] prevWords=history.split(" ");
-		for (Map.Entry<String, Double> entry : validWordMap.entrySet())
+		Map<String, Double> validWords = new HashMap<String, Double>();
+		Map<String, Double> possiableWords = wc.getCorrect(word);
+		String currTrigram;
+		for (Map.Entry<String, Double> entry : possiableWords.entrySet())
 		{			
 			currTrigram=history+" "+entry.getKey();
-			currBigram=prevWords[1]+" "+entry.getKey();
-			trigramMap.put(currTrigram, getScore(currTrigram,history));
-			bigramMap.put(currBigram, getScore(currBigram,history));
+			validWords.put(currTrigram, getScore(currTrigram,entry.getValue()));
 		}
-		trigramMap=sortByValue(trigramMap);
-		bigramMap=sortByValue(bigramMap);
-		ngramMap.putAll(trigramMap);
-		ngramMap.putAll(bigramMap);
-		return normalize(ngramMap);
+		validWords=sortByValue(validWords);
+		return normalize(validWords);
 	}
 
 	
 	/**
 	 * 
 	 * @param trigram
+	 * @param unigramProb 
 	 * @param history 
 	 * @return score (probability) of Trigram
 	 */
-	private double getScore(String trigram, String history) {
+	private double getScore(String trigram, Double unigramProb) {
+		
+		String [] words=trigram.split(" ");
+		String history=null;
+		int n=words.length-1;
+		if(n==0)
+			return unigramProb;
+		for(int i=0;i<n;i++)
+			history=history+" "+words[i];	
 
-		return (trainedTrigrams.prior(trigram)/trainedTrigrams.prior(history));
+		return (trainedTrigrams.prior(trigram)*getScore(history, unigramProb));
 	}
 	/**
 	 * Normalize scores
