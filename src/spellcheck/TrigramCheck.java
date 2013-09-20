@@ -8,16 +8,20 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import corpus.TriGrams;
+
 public class TrigramCheck {
 	private static final int NO_OF_SUGGESTION = 10;
-
-	/**
-	 * 
-	 */
+	WordCheck wc;
+	TriGrams trainedTrigrams;
+	
+	
 
 	public TrigramCheck() {
 		// TODO Auto-generated constructor stub
-		//init trigram 
+		trainedTrigrams=new TriGrams();
+		wc=new WordCheck();
+		
 	}
 	/**
 	 * 
@@ -26,26 +30,42 @@ public class TrigramCheck {
 	 * @return Map of Corrected string and its score 
 	 */
 	public  Map<String,Double> getCorrect(String word,String history){
-		//TODO 
-		return null;
-
+				
+		Map<String, Double> trigramMap = null,bigramMap = null,ngramMap=null;
+		Map<String, Double> validWordMap = wc.getCorrect(word);
+		String currBigram,currTrigram;
+		String [] prevWords=history.split(" ");
+		for (Map.Entry<String, Double> entry : validWordMap.entrySet())
+		{			
+			currTrigram=history+" "+entry.getKey();
+			currBigram=prevWords[1]+" "+entry.getKey();
+			trigramMap.put(currTrigram, getScore(currTrigram,history));
+			bigramMap.put(currBigram, getScore(currBigram,history));
+		}
+		trigramMap=sortByValue(trigramMap);
+		bigramMap=sortByValue(bigramMap);
+		ngramMap.putAll(trigramMap);
+		ngramMap.putAll(bigramMap);
+		return normalize(ngramMap);
 	}
 
+	
 	/**
 	 * 
 	 * @param trigram
+	 * @param history 
 	 * @return score (probability) of Trigram
 	 */
-	private double getScore(String trigram) {
+	private double getScore(String trigram, String history) {
 
-		return 0;
+		return (trainedTrigrams.prior(trigram)/trainedTrigrams.prior(history));
 	}
 	/**
 	 * Normalize scores
 	 * @param correct
 	 * @return
 	 */
-	private Map<String, Double> normailze(Map<String, Double> map) {
+	private Map<String, Double> normalize(Map<String, Double> map) {
 
 		double sum =0;
 		for (Double values : map.values())

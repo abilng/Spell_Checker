@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import spellcheck.WordCheck;
+
 public class TriGrams {
 	private static final String FILE_NAME = "Data/TrigramData.dat";
 	private static final String BROWN_TXT_PATH = "TrainData/Brown/";
@@ -126,10 +128,23 @@ public class TriGrams {
 		return ret;
 	}
 	
-	public double prior(String word) {
-		//TODO
-		return 0;
+	public double prior(String ngram) {
+		
+		String [] words=ngram.split(" ");
+		if(words.length==2)		
+			return ((bigramcount(ngram)+0.5)/(0.5*vacabulary+bigramCount));
+		
+		else if(words.length==3)
+			return ((trigramcount(ngram)+0.5)/(0.5*vacabulary+trigramCount));
+		
+		else
+		{	WordCheck wc=new WordCheck();
+			return wc.trainedData.prior(ngram);
+		
+		}
 		
 	}
-	
+		
 }
+	
+

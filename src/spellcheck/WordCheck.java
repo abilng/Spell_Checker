@@ -20,7 +20,7 @@ public class WordCheck {
 	 * For correct Words ignoring context
 	 */
 	ConfusionMatrix cMatrix;
-	TrainedWords trainedData;
+	public TrainedWords trainedData;
 	
 	final static int MAX_EDIT = 3;
 	final static int NO_OF_SUGGESTION = 10;

@@ -16,7 +16,7 @@ import edu.mit.jwi.item.POS;
  */
 public class Dictionary {
 
-	private static final String WORDNET_DICT = "/usr/share/wordnet/dict";
+	private static final String WORDNET_DICT = "dict";
 	private IDictionary dict;
 
 	public Dictionary() {
