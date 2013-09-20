@@ -6,6 +6,7 @@ package wordnet;
 import java.io.File;
 import java.io.IOException;
 
+import config.Properties;
 import edu.mit.jwi.IDictionary;
 import edu.mit.jwi.item.IIndexWord;
 import edu.mit.jwi.item.POS;
@@ -16,7 +17,7 @@ import edu.mit.jwi.item.POS;
  */
 public class Dictionary {
 
-	private static final String WORDNET_DICT = "dict";
+	private static final String WORDNET_DICT = Properties.WORDNET_DICT_PATH;
 	private IDictionary dict;
 
 	public Dictionary() {

@@ -20,14 +20,14 @@ public class WordCheck {
 	 * For correct Words ignoring context
 	 */
 	ConfusionMatrix cMatrix;
-	public TrainedWords trainedData;
+	private TrainedWords trainedData;
 	
 	final static int MAX_EDIT = 3;
 	final static int NO_OF_SUGGESTION = 10;
 
-	public WordCheck() {
+	public WordCheck(TrainedWords trainedWords) {
 		this.cMatrix = new ConfusionMatrix();
-		this.trainedData = new TrainedWords();
+		this.trainedData = trainedWords;
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class WordCheck {
 	 * @param word
 	 */
 	private void isValidWord(final Set<String> wordarray,final String word) {
-		if(trainedData.count(word)>0){
+		if(trainedData.wordCount(word)>0){
 			wordarray.add(word);
 		}
 	}
