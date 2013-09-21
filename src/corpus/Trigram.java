@@ -14,7 +14,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-
 import config.Properties;
 
 class Trigram {
@@ -24,7 +23,9 @@ class Trigram {
 
 	Hashtable<String,Integer> trigramTable;
 	Hashtable<String,Integer> bigramTable;
+	private int vacabulary;
 	public Trigram() {
+		System.err.println("Init: Trigram..");
 		try {
 			read(FILE_NAME);
 		} catch (Exception e) {
@@ -33,7 +34,7 @@ class Trigram {
 
 			trigramTable = new Hashtable<String, Integer>();
 			bigramTable = new Hashtable<String, Integer>();
-			
+
 			train();
 
 			try {
@@ -43,17 +44,20 @@ class Trigram {
 				System.exit(2);
 			}
 		}
+		vacabulary = bigramTable.size();
 	}
 
 
 	@SuppressWarnings("unchecked")
 	private void read(String file) throws IOException, ClassNotFoundException {
 		InputStream buffer;
+		System.err.println("Reading Data file:"+ file);
 		buffer = new BufferedInputStream( new FileInputStream(file));
 		ObjectInput input = new ObjectInputStream ( buffer );
 		trigramTable = (Hashtable<String, Integer>) input.readObject();
 		bigramTable = (Hashtable<String, Integer>) input.readObject();
 		input.close();
+		System.err.println("Finished");
 	}
 
 	private void save(String file) throws IOException {
@@ -61,18 +65,47 @@ class Trigram {
 		buffer = new BufferedOutputStream( new FileOutputStream(file));
 		ObjectOutput output = new ObjectOutputStream ( buffer );
 		output.writeObject(trigramTable);
-		output.writeObject(trigramTable);
+		output.writeObject(bigramTable);
 		output.close();
 	}
 	private void train() {	
-		BufferedReader buffer;
+		BufferedReader reader;
+		String [] trigram = new String [3];
+		String [] bigram = new String [2];
+		int trigramCount =0 ,bigramCount = 0;
+
 		try
 		{
 
 			System.err.println("Opening :" + TRIGRAM_FILE +"..");
-			buffer = new BufferedReader(new FileReader(TRIGRAM_FILE));
-			//TODO Update
-			buffer.close();
+			reader = new BufferedReader(new FileReader(TRIGRAM_FILE));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				line = line.trim();
+
+				if (line.length() == 0)
+					continue;
+
+				String[] lineParts = line.split("\\s+");
+				trigramCount = Integer.parseInt(lineParts[0]);
+
+				trigram[0] = lineParts[1];
+				trigram[1] = lineParts[2];
+				trigram[2] = lineParts[3];
+
+				if(trigram[0].equals(bigram[0]) && trigram[1].equals(bigram[1])) {
+					bigramCount+=trigramCount;
+				} else {
+					bigramTable.put(bigram[0] + " "+ bigram[1], bigramCount);
+					bigram[0] = trigram[0];
+					bigram[1] = trigram[1];
+					bigramCount = trigramCount;
+				}
+				trigramTable.put(trigram[0] + " "+ trigram[1]+ " "+ trigram[2],
+						trigramCount);
+
+			}
+			reader.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -92,9 +125,11 @@ class Trigram {
 	}
 
 
-	public double prior(String ngram) {
-		// TODO Auto-generated method stub
-		return 0;
+	public double prior(String word,String history) {
+		return (count(history.trim() +" "+word.trim())+0.5)/
+				(bigramcount(history.trim())+vacabulary*0.5);
 	}
+
+
 
 }

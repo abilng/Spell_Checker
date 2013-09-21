@@ -206,7 +206,7 @@ public class WordCheck {
 		}
 
 		for (String str : validWords) {
-			score = trainedData.prior(str);
+			score = trainedData.unigramPrior(str);
 			correct.put(str, score);
 		}
 		correct = sortByValue(correct);

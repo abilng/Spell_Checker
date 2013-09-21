@@ -29,8 +29,9 @@ public class  Properties{
 			WORDNET_DICT_PATH = prop.getProperty("WORDNET_DICT_PATH");
 			BROWN_PATH = prop.getProperty("BROWN_PATH");
 			CMATIX_PATH = prop.getProperty("CMATIX_PATH");
-			TRIGRAM_FILE = prop.getProperty("TRIGRAM_TXT_PATH");
-			BIGRAM_FILE = prop.getProperty("BIGRAM_TXT_PATH");
+			TRIGRAM_FILE = prop.getProperty("TRIGRAM_FILE");
+			BIGRAM_FILE = prop.getProperty("BIGRAM_FILE");
+			//System.err.println(prop.toString());
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}

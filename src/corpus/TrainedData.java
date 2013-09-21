@@ -26,16 +26,21 @@ public class TrainedData {
 			return unigramData.count(ngram);
 	}
 	
-	public double prior(String ngram) {
-		
-		String [] words=ngram.split(" ");
-		
-		if(words.length==3)		
-			return trigramData.prior(ngram);
-		if(words.length==2)
-			return bigramData.prior(ngram);
-		else
-			return unigramData.prior(ngram);
+	public double trigramPrior(String word, String history) {
+		return trigramData.prior(word,history);
+	}
+	public double bigramPrior(String word, String history) {
+		return bigramData.prior(word,history);
+	}
+	public double unigramPrior(String word) {
+		return unigramData.prior(word);
+	}
+	
+	public boolean hasWord(String word){
+		if(unigramData.count(word)>0){
+			return true;
+		} else
+			return false;
 	}
 		
 }

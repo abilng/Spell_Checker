@@ -14,7 +14,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-
 import config.Properties;
 
 class Bigram {
@@ -24,9 +23,11 @@ class Bigram {
 
 	Hashtable<String,Integer> bigramTable;
 	Hashtable<String,Integer> unigramTable;
+	private int vacabulary;
 
 	public Bigram() {
 		try {
+			System.err.println("Init: Bigram..");
 			read(FILE_NAME);
 		} catch (Exception e) {
 			System.err.println("Data File Not Found: (" + e.getMessage() + ")");
@@ -43,17 +44,20 @@ class Bigram {
 				System.exit(2);
 			}
 		}
+		vacabulary = unigramTable.size();
 	}
 
 
 	@SuppressWarnings("unchecked")
 	private void read(String file) throws IOException, ClassNotFoundException {
 		InputStream buffer;
+		System.err.println("Reading Data file:"+ file);
 		buffer = new BufferedInputStream( new FileInputStream(file));
 		ObjectInput input = new ObjectInputStream ( buffer );
 		bigramTable = (Hashtable<String, Integer>) input.readObject();
 		unigramTable = (Hashtable<String, Integer>) input.readObject();
 		input.close();
+		System.err.println("Finished");
 	}
 
 	private void save(String file) throws IOException {
@@ -65,14 +69,41 @@ class Bigram {
 		output.close();
 	}
 	private void train() {	
-		BufferedReader buffer;
+		BufferedReader reader;
+		String [] bigram = new String [2];
+		String unigram = new String ();
+		int bigramCount =0 ,unigramCount = 0;
+		
 		try
 		{
 
 			System.err.println("Opening :" + BIGRAM_FILE +"..");
-			buffer = new BufferedReader(new FileReader(BIGRAM_FILE));
-			//TODO Update
-			buffer.close();
+			reader = new BufferedReader(new FileReader(BIGRAM_FILE));
+			
+			String line;
+			while ((line = reader.readLine()) != null) {
+				line = line.trim();
+
+				if (line.length() == 0)
+					continue;
+
+				String[] lineParts = line.split("\\s+");
+				bigramCount = Integer.parseInt(lineParts[0]);
+
+				bigram[0] = lineParts[1];
+				bigram[1] = lineParts[2];
+
+				if(bigram[0].equals(unigram)) {
+					unigramCount+=bigramCount;
+				} else {
+					unigramTable.put(unigram, unigramCount);
+					unigram = bigram[0];
+					unigramCount = bigramCount;
+				}
+				bigramTable.put(bigram[0] + " "+ bigram[1],
+						bigramCount);
+			}
+			unigramTable.put(unigram, unigramCount);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -91,9 +122,9 @@ class Bigram {
 		return ret;
 	}
 
-	public double prior(String ngram) {
-		// TODO Auto-generated method stub
-		return 0;
+	public double prior(String word,String history) {
+		return (count(history.trim() +" "+word.trim())+0.5)/
+				(unigramcount(history.trim())+0.5*vacabulary);
 	}
-
+	
 }

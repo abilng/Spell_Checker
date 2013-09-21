@@ -1,29 +1,35 @@
 package spellcheck;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import corpus.TrainedData;
-import corpus.TrainedData;
 
 public class TrigramCheck {
+
 	private static final int NO_OF_SUGGESTION = 10;
+	private static final double LAMBDA1 = 1.0/3;
+	private static final double LAMBDA2 = 1.0/3;
+	private static final double LAMBDA3 = 1.0/3;
+
 	WordCheck wc;
-	TrainedData trainedTrigrams;
-	
-	
+	TrainedData trainedData;
 
-	public TrigramCheck(TrainedData triGrams,TrainedData trainedData) {
 
-		trainedTrigrams= triGrams;
+
+	public TrigramCheck(TrainedData trainedData) {
+
+		this.trainedData= trainedData;
 		wc=new WordCheck(trainedData);
-		
+
 	}
 	/**
 	 * 
@@ -32,38 +38,74 @@ public class TrigramCheck {
 	 * @return Map of Corrected string and its score 
 	 */
 	public  Map<String,Double> getCorrect(String word,String history){
-				
-		Map<String, Double> validWords = new HashMap<String, Double>();
+
+		System.err.println("["+history + "]|" + word +"|");
+
 		Map<String, Double> possiableWords = wc.getCorrect(word);
-		String currTrigram;
+		Map<String, Double> trigram = new HashMap<String, Double>();
+		Map<String, Double> validWords; 
 		for (Map.Entry<String, Double> entry : possiableWords.entrySet())
 		{			
-			currTrigram=history+" "+entry.getKey();
-			validWords.put(currTrigram, getScore(currTrigram,entry.getValue()));
+			trigram.put(history.trim()+" "+entry.getKey(),Double.MIN_VALUE);
 		}
+		validWords = getScore(trigram,possiableWords);
 		validWords=sortByValue(validWords);
 		return normalize(validWords);
 	}
 
-	
-	/**
-	 * 
-	 * @param trigram
-	 * @param unigramProb 
-	 * @param history 
-	 * @return score (probability) of Trigram
-	 */
-	private double getScore(String trigram, Double unigramProb) {
-		
-		String [] words=trigram.split(" ");
-		String history=null;
-		int n=words.length-1;
-		if(n==0)
-			return unigramProb;
-		for(int i=0;i<n;i++)
-			history=history+" "+words[i];	
 
-		return (trainedTrigrams.prior(trigram)*getScore(history, unigramProb));
+	private Map<String, Double> getScore(Map<String, Double> ngrams,
+			Map<String, Double> possiableWords) {
+
+		List<Double> trigramProbList = new ArrayList<Double>();
+		List<Double> bigramProbList = new ArrayList<Double>();
+		double trigramProb = 0,bigramProb = 0,unigramProb = 0;
+		for (Map.Entry<String, Double> entry : ngrams.entrySet()) {
+			String ngram = entry.getKey();
+			String [] words=ngram.trim().split(" ");
+				
+			if(words.length==3){
+				trigramProb = trainedData.trigramPrior(words[2], words[0] +" " + words[1]);
+				trigramProb = trigramProb>Double.MIN_VALUE?trigramProb:Double.MIN_VALUE;
+				bigramProb = trainedData.bigramPrior(words[2], words[1]);
+				bigramProb = bigramProb>Double.MIN_VALUE?bigramProb:Double.MIN_VALUE;
+			} else if(words.length==2){
+				trigramProb = Double.MIN_VALUE;
+				bigramProb = trainedData.bigramPrior(words[1], words[0] );
+				bigramProb = bigramProb>Double.MIN_VALUE?bigramProb:Double.MIN_VALUE;
+			} else {   //if(words.length==1)
+				trigramProb = Double.MIN_VALUE;
+				bigramProb = Double.MIN_VALUE;
+			}
+			
+			trigramProbList.add(trigramProb);
+			bigramProbList.add(bigramProb);
+		}
+		normalise(bigramProbList);
+		normalise(trigramProbList);
+		int i = 0;
+		for (Map.Entry<String, Double> entry : possiableWords.entrySet()) {
+			bigramProb = bigramProbList.get(i);
+			trigramProb = trigramProbList.get(i);
+			unigramProb = entry.getValue();
+
+			possiableWords.put(entry.getKey(),
+					LAMBDA1*trigramProb + LAMBDA2*bigramProb + LAMBDA3*unigramProb);
+			
+			i++;
+		}
+
+
+		return possiableWords;
+	}
+
+	private void normalise(List<Double> proablities) {
+		double sum =0;
+		for (Double values : proablities)
+			sum+=values;
+		for (int i = 0; i < proablities.size(); i++) {
+			proablities.set(i, proablities.get(i)/sum);
+		}
 	}
 	/**
 	 * Normalize scores
