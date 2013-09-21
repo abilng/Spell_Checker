@@ -13,10 +13,11 @@ import corpus.TrainedData;
 
 public class TrigramCheck {
 
-	private static final int NO_OF_SUGGESTION = 10;
-	private static final double LAMBDA1 = 5.0/10;
-	private static final double LAMBDA2 = 3.0/10;
-	private static final double LAMBDA3 = 2.0/10;
+	private static final int NO_OF_SUGGESTION = 5;
+	private static final double LAMBDA1 = 5.0/14;
+	private static final double LAMBDA2 = 3.0/14;
+	private static final double LAMBDA3 = 2.0/14;
+	private static final double LAMBDA4 = 4.0/14;
 
 	WordCheck wc;
 	TrainedData trainedData;
@@ -33,11 +34,12 @@ public class TrigramCheck {
 	 * 
 	 * @param word word to be corrected
 	 * @param history  previous words(up to 2)
+	 * @param next 
 	 * @return Map of Corrected string and its score 
 	 */
-	public  Map<String,Double> getCorrect(String word,String history){
+	public  Map<String,Double> getCorrect(String word,String history, String next){
 
-		System.err.println("["+history + "]|" + word +"|");
+		System.err.println(history + " [" + word +"] " + next);
 
 		Map<String, Double> possiableWords = wc.getCorrect(word);
 		Map<String, Double> trigram = new HashMap<String, Double>();
@@ -46,18 +48,19 @@ public class TrigramCheck {
 		{			
 			trigram.put(history.trim()+" "+entry.getKey(),Double.MIN_VALUE);
 		}
-		validWords = getScore(trigram,possiableWords);
+		validWords = getScore(trigram,possiableWords,next);
 		validWords=sortByValue(validWords);
 		return normalize(validWords);
 	}
 
 
 	private Map<String, Double> getScore(Map<String, Double> ngrams,
-			Map<String, Double> possiableWords) {
+			Map<String, Double> possiableWords, String next) {
 
-		Map<String,Double> trigramProbMap = new HashMap<String,Double>();
-		Map<String,Double> bigramProbMap = new HashMap<String,Double>();
-		double trigramProb = 0,bigramProb = 0,unigramProb = 0;
+		final Map<String,Double> trigramProbMap = new HashMap<String,Double>();
+		final Map<String,Double> bigramProbMap = new HashMap<String,Double>();
+		final Map<String,Double> bigramProbNextMap = new HashMap<String,Double>();
+		double trigramProb = 0,bigramProb = 0,unigramProb = 0,nextProb=0;
 		String newWord;
 		for (Map.Entry<String, Double> entry : ngrams.entrySet()) {
 			String ngram = entry.getKey();
@@ -78,19 +81,55 @@ public class TrigramCheck {
 				trigramProb = Double.MIN_VALUE;
 				bigramProb = Double.MIN_VALUE;
 			}
+			if(next ==null ||next.trim().isEmpty()) {
+				nextProb = Double.MIN_VALUE;
+			} else {
+				nextProb = trainedData.bigramPrior(newWord, next);
+				nextProb = nextProb>Double.MIN_VALUE?nextProb:Double.MIN_VALUE;
+			}
+			
 			trigramProbMap.put(newWord,trigramProb);
 			bigramProbMap.put(newWord,bigramProb);
+			bigramProbNextMap.put(newWord, nextProb);
 		}
-		normalize(bigramProbMap);
-		normalize(trigramProbMap);
-		System.err.println();
+		Thread trigramThread = new Thread() {
+			public void run() {
+				normalize(trigramProbMap);
+			}
+		};
+		Thread bigramThread = new Thread() {
+			public void run() {
+				normalize(bigramProbMap);
+			}
+		};
+		Thread bigramNextThread = new Thread() {
+			public void run() {
+				normalize(bigramProbNextMap);
+			}
+		};
+		trigramThread.start();
+		bigramThread.start();
+		bigramNextThread.start();
+		
+		try {
+			trigramThread.join();
+			bigramThread.join();
+			bigramNextThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
 		for (Map.Entry<String, Double> entry : possiableWords.entrySet()) {
 			newWord = entry.getKey();
 			bigramProb = bigramProbMap.get(newWord);
 			trigramProb = trigramProbMap.get(newWord);
 			unigramProb = entry.getValue();
+			nextProb = bigramProbNextMap.get(newWord);
 			possiableWords.put(newWord,
-					LAMBDA1*trigramProb + LAMBDA2*bigramProb + LAMBDA3*unigramProb);
+					LAMBDA1*trigramProb + LAMBDA2*bigramProb +
+					LAMBDA3*unigramProb + LAMBDA4*nextProb);
 		}
 		
 		return possiableWords;

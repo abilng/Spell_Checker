@@ -46,6 +46,7 @@ public class PhraseSpellCheck {
 		TrigramCheck trigramCheck = new TrigramCheck(trainedData);
 		
 		StringBuilder trigrams = new StringBuilder();
+		String next;
 		List<String> words = new ArrayList<String>();
 		
 		for (String word : curr.split("\\s+")) {
@@ -58,14 +59,17 @@ public class PhraseSpellCheck {
 				
 				trigrams.delete(0, trigrams.length());//make empty
 				
-				for(int i=words.indexOf(curr_word) -2;i<words.indexOf(curr_word);i++) {
+				int index = words.indexOf(curr_word);
+				for(int i=index -2;i<index;i++) {
 					if(i>=0) trigrams.append(words.get(i)+" ");
 				}
-				
-				if(trigrams.length()>0)
-					trigrams.delete(trigrams.length()-1, trigrams.length());
+				if(index+1<words.size())
+					next = words.get(index+1);
+				else
+					next ="";
 
-				Map<String, Double> map = trigramCheck.getCorrect(curr_word,trigrams.toString());
+				Map<String, Double> map = trigramCheck.getCorrect(
+						curr_word,trigrams.toString().trim(),next);
 
 				buffer.write("[");
 				for (String string : map.keySet()) {
