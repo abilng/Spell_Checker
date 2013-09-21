@@ -55,10 +55,13 @@ public class PhraseSpellCheck {
 		for (String curr_word : words) {
 			if(! dict.hasWord(curr_word) && ! trainedData.hasWord(curr_word) ){
 				buffer.write(curr_word +"\t");
+				
 				trigrams.delete(0, trigrams.length());//make empty
+				
 				for(int i=words.indexOf(curr_word) -2;i<words.indexOf(curr_word);i++) {
 					if(i>=0) trigrams.append(words.get(i)+" ");
 				}
+				
 				if(trigrams.length()>0)
 					trigrams.delete(trigrams.length()-1, trigrams.length());
 

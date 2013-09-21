@@ -1,13 +1,11 @@
 package spellcheck;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -16,9 +14,9 @@ import corpus.TrainedData;
 public class TrigramCheck {
 
 	private static final int NO_OF_SUGGESTION = 10;
-	private static final double LAMBDA1 = 1.0/3;
-	private static final double LAMBDA2 = 1.0/3;
-	private static final double LAMBDA3 = 1.0/3;
+	private static final double LAMBDA1 = 5.0/10;
+	private static final double LAMBDA2 = 3.0/10;
+	private static final double LAMBDA3 = 2.0/10;
 
 	WordCheck wc;
 	TrainedData trainedData;
@@ -57,56 +55,47 @@ public class TrigramCheck {
 	private Map<String, Double> getScore(Map<String, Double> ngrams,
 			Map<String, Double> possiableWords) {
 
-		List<Double> trigramProbList = new ArrayList<Double>();
-		List<Double> bigramProbList = new ArrayList<Double>();
+		Map<String,Double> trigramProbMap = new HashMap<String,Double>();
+		Map<String,Double> bigramProbMap = new HashMap<String,Double>();
 		double trigramProb = 0,bigramProb = 0,unigramProb = 0;
+		String newWord;
 		for (Map.Entry<String, Double> entry : ngrams.entrySet()) {
 			String ngram = entry.getKey();
 			String [] words=ngram.trim().split(" ");
-				
 			if(words.length==3){
-				trigramProb = trainedData.trigramPrior(words[2], words[0] +" " + words[1]);
+				newWord = words[2];
+				trigramProb = trainedData.trigramPrior(newWord, words[0] +" " + words[1]);
 				trigramProb = trigramProb>Double.MIN_VALUE?trigramProb:Double.MIN_VALUE;
-				bigramProb = trainedData.bigramPrior(words[2], words[1]);
+				bigramProb = trainedData.bigramPrior(newWord, words[1]);
 				bigramProb = bigramProb>Double.MIN_VALUE?bigramProb:Double.MIN_VALUE;
 			} else if(words.length==2){
+				newWord = words[1];
 				trigramProb = Double.MIN_VALUE;
-				bigramProb = trainedData.bigramPrior(words[1], words[0] );
+				bigramProb = trainedData.bigramPrior(newWord, words[0]);
 				bigramProb = bigramProb>Double.MIN_VALUE?bigramProb:Double.MIN_VALUE;
 			} else {   //if(words.length==1)
+				newWord = words[0];
 				trigramProb = Double.MIN_VALUE;
 				bigramProb = Double.MIN_VALUE;
 			}
-			
-			trigramProbList.add(trigramProb);
-			bigramProbList.add(bigramProb);
+			trigramProbMap.put(newWord,trigramProb);
+			bigramProbMap.put(newWord,bigramProb);
 		}
-		normalise(bigramProbList);
-		normalise(trigramProbList);
-		int i = 0;
+		normalize(bigramProbMap);
+		normalize(trigramProbMap);
+		System.err.println();
 		for (Map.Entry<String, Double> entry : possiableWords.entrySet()) {
-			bigramProb = bigramProbList.get(i);
-			trigramProb = trigramProbList.get(i);
+			newWord = entry.getKey();
+			bigramProb = bigramProbMap.get(newWord);
+			trigramProb = trigramProbMap.get(newWord);
 			unigramProb = entry.getValue();
-
-			possiableWords.put(entry.getKey(),
+			possiableWords.put(newWord,
 					LAMBDA1*trigramProb + LAMBDA2*bigramProb + LAMBDA3*unigramProb);
-			
-			i++;
 		}
-
-
+		
 		return possiableWords;
 	}
 
-	private void normalise(List<Double> proablities) {
-		double sum =0;
-		for (Double values : proablities)
-			sum+=values;
-		for (int i = 0; i < proablities.size(); i++) {
-			proablities.set(i, proablities.get(i)/sum);
-		}
-	}
 	/**
 	 * Normalize scores
 	 * @param correct
