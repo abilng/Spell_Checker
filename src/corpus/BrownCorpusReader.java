@@ -177,8 +177,8 @@ public class BrownCorpusReader {
 							taggedWord + "'");
 					continue;
 				}
-				Integer val = dataMap.get(word);
-				if(val == null)	dataMap.put(word,1);
+				Integer val = dataMap.get(word.toLowerCase());
+				if(val == null)	dataMap.put(word.toLowerCase(),1);
 				else dataMap.put(word.toLowerCase(),val + 1);
 				count++;
 			}
