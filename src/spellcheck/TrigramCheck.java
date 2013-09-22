@@ -14,11 +14,11 @@ import corpus.TrainedData;
 public class TrigramCheck {
 
 	private static final int NO_OF_SUGGESTION = 5;
-	private static final double LAMBDA1 = 5.0/14;
-	private static final double LAMBDA2 = 3.0/14;
-	private static final double LAMBDA3 = 2.0/14;
-	private static final double LAMBDA4 = 4.0/14;
-
+	private static final double LAMBDA2 = 5.0/14;
+	private static final double LAMBDA1 = 3.0/14;
+	private static final double LAMBDA0 = 2.0/14;
+	private static final double LAMBDA_1 = 4.0/14;
+	
 	WordCheck wc;
 	TrainedData trainedData;
 
@@ -34,12 +34,12 @@ public class TrigramCheck {
 	 * 
 	 * @param word word to be corrected
 	 * @param history  previous words(up to 2)
-	 * @param next 
+	 * @param nextWord 
 	 * @return Map of Corrected string and its score 
 	 */
-	public  Map<String,Double> getCorrect(String word,String history, String next){
+	public  Map<String,Double> getCorrect(String word,String history, String nextWord){
 
-		System.err.println(history + " [" + word +"] " + next);
+		System.err.println(history + " [" + word +"] " + nextWord);
 
 		Map<String, Double> possiableWords = wc.getCorrect(word);
 		Map<String, Double> trigram = new HashMap<String, Double>();
@@ -48,7 +48,7 @@ public class TrigramCheck {
 		{			
 			trigram.put(history.trim()+" "+entry.getKey(),Double.MIN_VALUE);
 		}
-		validWords = getScore(trigram,possiableWords,next);
+		validWords = getScore(trigram,possiableWords,nextWord);
 		validWords=sortByValue(validWords);
 		return normalize(validWords);
 	}
@@ -128,8 +128,8 @@ public class TrigramCheck {
 			unigramProb = entry.getValue();
 			nextProb = bigramProbNextMap.get(newWord);
 			possiableWords.put(newWord,
-					LAMBDA1*trigramProb + LAMBDA2*bigramProb +
-					LAMBDA3*unigramProb + LAMBDA4*nextProb);
+					LAMBDA2*trigramProb + LAMBDA1*bigramProb +
+					LAMBDA0*unigramProb + LAMBDA_1*nextProb);
 		}
 		
 		return possiableWords;
