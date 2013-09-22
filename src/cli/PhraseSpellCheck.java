@@ -54,7 +54,8 @@ public class PhraseSpellCheck {
 		}
 
 		for (String curr_word : words) {
-			if(! dict.hasWord(curr_word) && ! trainedData.hasWord(curr_word) ){
+			if (!dict.hasWord(curr_word.toLowerCase())
+					&& !trainedData.hasWord(curr_word.toLowerCase())) {
 				buffer.write(curr_word +"\t");
 				
 				trigrams.delete(0, trigrams.length());//make empty
