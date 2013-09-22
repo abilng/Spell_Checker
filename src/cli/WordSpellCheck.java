@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import corpus.TrainedData;
 import spellcheck.WordCheck;
 import wordnet.Dictionary;
+import corpus.TrainedData;
 
 public class WordSpellCheck {
 
-	private static final String inputFile = "input.tsv";
-	private static final String ouputFile = "output.tsv";
+	private static final String inputFile = "words_input.tsv";
+	private static final String ouputFile = "words_output.tsv";
 
 	public static List<String> readWords(String file) {
 		BufferedReader buffer;
@@ -47,13 +47,12 @@ public class WordSpellCheck {
 		List<String> words = readWords(inputFile);
 		Dictionary dict = new Dictionary();
 		TrainedData trainedData = new TrainedData();
-		WordCheck wc = new WordCheck(trainedData);
 
 		BufferedWriter buffer;
 		try {
 			buffer = new BufferedWriter(new FileWriter(ouputFile));
 			for (String str : words) {
-				spellCheck(dict, wc, str,buffer);	
+				spellCheck(dict, trainedData, str,buffer);	
 			}
 			System.err.println("Saving output file:"+ouputFile);
 			buffer.close();
@@ -62,11 +61,15 @@ public class WordSpellCheck {
 		}
 	}
 
-	private static void spellCheck(Dictionary dict, WordCheck wc,
-			String str, BufferedWriter buffer) throws IOException {
-		if(! dict.hasWord(str)){
-			buffer.write(str +"\t");
-			Map<String, Double> map = wc.getCorrect(str);
+	private static void spellCheck(Dictionary dict, TrainedData trainedData,
+			String word, BufferedWriter buffer) throws IOException {
+		
+		WordCheck wc = new WordCheck(trainedData);
+		
+	    if (!trainedData.hasWord(word.toLowerCase())
+	    		&& !dict.hasWord(word.toLowerCase())) {
+			buffer.write(word +"\t");
+			Map<String, Double> map = wc.getCorrect(word);
 
 			for (Map.Entry<String, Double> entry : map.entrySet()) {
 				String newWord = entry.getKey();
@@ -76,7 +79,7 @@ public class WordSpellCheck {
 
 			buffer.newLine();
 		} else {
-			buffer.write(str +"  *");
+			buffer.write(word +"  *");
 			buffer.newLine();
 		}
 	}

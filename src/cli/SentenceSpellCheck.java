@@ -14,8 +14,8 @@ import spellcheck.TrigramCheck;
 import wordnet.Dictionary;
 
 public class SentenceSpellCheck {
-    static String inputFile = "sentence_input.tsv";
-    static String outputFile = "sentence_output.tsv";
+    static String inputFile = "sentences_input.tsv";
+    static String outputFile = "sentences_output.tsv";
 
     @SuppressWarnings("resource")
     public static List<String> readPhrases(String file) {
@@ -59,8 +59,8 @@ public class SentenceSpellCheck {
 	}
 
 	for (String curr_word : words) {
-	    if (!dict.hasWord(curr_word.toLowerCase())
-		&& !trainedData.hasWord(curr_word.toLowerCase())) {
+	    if (!trainedData.hasWord(curr_word.toLowerCase())
+	    		&& !dict.hasWord(curr_word.toLowerCase())) {
 		buffer.write(curr_word + "\t");
 
 		trigrams.delete(0, trigrams.length());// make empty

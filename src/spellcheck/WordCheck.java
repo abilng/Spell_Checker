@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import corpus.TrainedData;
 
 public class WordCheck {
+	private static final int MAX_LOOPING = 220000;
 	/**
 	 * For correct Words ignoring context
 	 */
@@ -192,7 +193,9 @@ public class WordCheck {
 		validWords = edits(word,allWords);
 		editDistance++;
 		
-		while(validWords.isEmpty() && editDistance <=MAX_EDIT){
+		while(validWords.isEmpty() 
+				&& editDistance <=MAX_EDIT 
+				&& allWords.size()<=MAX_LOOPING){
 			editDistance++;
 			Iterator<String> iterator = allWords.iterator();
 			List<String> newAllWords =
