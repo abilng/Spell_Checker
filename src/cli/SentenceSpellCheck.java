@@ -14,102 +14,98 @@ import spellcheck.TrigramCheck;
 import wordnet.Dictionary;
 
 public class SentenceSpellCheck {
-    static String inputFile = "sentences_input.tsv";
-    static String outputFile = "sentences_output.tsv";
+	static String inputFile = "sentences_input.tsv";
+	static String outputFile = "sentences_output.tsv";
 
-    @SuppressWarnings("resource")
-    public static List<String> readPhrases(String file) {
-	BufferedInputStream buffer;
-	List<String> phrases = new ArrayList<String>();
+	public static void correctSentence(String infile,String outFile,
+			Dictionary dict, TrainedData trainedData) {
+		BufferedInputStream inBuffer;
+		BufferedWriter outBuffer;
 
-	try {
-	    buffer = new BufferedInputStream(new FileInputStream(file));
-	    StringBuilder line = new StringBuilder("");
-	    int c;
-	    char ch;
-	    while ((c = buffer.read()) != -1) {
-		ch = (char) c;
-		if (Character.isAlphabetic(ch))
-		    line.append(ch);
-		else if(ch==','||ch=='.'||ch=='?'||ch=='!'){
-		    phrases.add(line.toString().trim());
-		    line = new StringBuilder("");
+		System.err.println("Opening input file:" + infile);
+
+		try {
+			inBuffer = new BufferedInputStream(new FileInputStream(infile));
+			outBuffer = new BufferedWriter(new FileWriter(outFile));
+			StringBuilder line = new StringBuilder("");
+			int c;
+			char ch;
+			while ((c = inBuffer.read()) != -1) {
+				ch = (char) c;
+				if (Character.isAlphabetic(ch))
+					line.append(ch);
+				else if(ch==','||ch=='.'||ch=='?'||ch=='!'){
+					spellCheck(dict, trainedData,line.toString().trim(), outBuffer);
+					line = new StringBuilder("");
+					outBuffer.append(ch);
+				} else {
+					line.append(' ');
+					if(ch == '\n') outBuffer.newLine();
+				}
+			}
+			outBuffer.close();
+			inBuffer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		else line.append(' ');
+		System.err.println("Output File Saved:"+outFile);
 
-	    }
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-	return phrases;
-
-    }
-
-    private static void spellCheck(Dictionary dict, TrainedData trainedData,
-				   String curr, BufferedWriter buffer) throws IOException {
-
-	TrigramCheck trigramCheck = new TrigramCheck(trainedData);
-
-	StringBuilder trigrams = new StringBuilder();
-	String next;
-	List<String> words = new ArrayList<String>();
-
-	for (String word : curr.split("\\s+")) {
-	    words.add(word);
 	}
 
-	for (String curr_word : words) {
-	    if (!trainedData.hasWord(curr_word.toLowerCase())
-	    		&& !dict.hasWord(curr_word.toLowerCase())) {
-		buffer.write(curr_word + "\t");
+	private static void spellCheck(Dictionary dict, TrainedData trainedData,
+			String curr, BufferedWriter buffer) throws IOException {
 
-		trigrams.delete(0, trigrams.length());// make empty
+		TrigramCheck trigramCheck = new TrigramCheck(trainedData);
 
-		int index = words.indexOf(curr_word);
-		for (int i = index - 2; i < index; i++) {
-		    if (i >= 0)
-			trigrams.append(words.get(i) + " ");
+		StringBuilder trigrams = new StringBuilder();
+		String next;
+		List<String> words = new ArrayList<String>();
+
+		for (String word : curr.split("\\s+")) {
+			words.add(word);
 		}
-		if (index + 1 < words.size())
-		    next = words.get(index + 1);
-		else
-		    next = "";
 
-		Map<String, Double> map = trigramCheck.getCorrect(curr_word,
-								  trigrams.toString().trim(), next);
+		for (String curr_word : words) {
+			if (!trainedData.hasWord(curr_word.toLowerCase())
+					&& !dict.hasWord(curr_word.toLowerCase())) {
+				buffer.write(curr_word + "\t");
 
-		buffer.write("[");
-		for (String string : map.keySet()) {
-		    String score = String.format("%.2f", map.get(string) * 100);
-		    buffer.write(string + "  <" + score + ">\t");
+				trigrams.delete(0, trigrams.length());// make empty
+
+				int index = words.indexOf(curr_word);
+				for (int i = index - 2; i < index; i++) {
+					if (i >= 0)
+						trigrams.append(words.get(i) + " ");
+				}
+				if (index + 1 < words.size())
+					next = words.get(index + 1);
+				else
+					next = "";
+
+				Map<String, Double> map = trigramCheck.getCorrect(curr_word,
+						trigrams.toString().trim(), next);
+
+				buffer.write("[ ");
+				for (String string : map.keySet()) {
+					String score = String.format("%.2f", map.get(string) * 100);
+					buffer.write(string + "  <" + score + ">  ");
+				}
+				buffer.write("] ");
+
+			} else {
+				buffer.write(curr_word + " ");
+			}
 		}
-		buffer.write("]");
-
-	    } else {
-		buffer.write(curr_word + " ");
-	    }
 	}
-	buffer.newLine();
 
-    }
+	public static void main(String[] args) {
 
-    public static void main(String[] args) {
+		Dictionary dict = new Dictionary();
 
-	Dictionary dict = new Dictionary();
+		TrainedData trainedData = new TrainedData();
 
-	TrainedData trainedData = new TrainedData();
+		correctSentence(inputFile, outputFile, dict, trainedData);
 
-	List<String> phrases = readPhrases(inputFile);
-	BufferedWriter buffer;
-	try {
-	    buffer = new BufferedWriter(new FileWriter(outputFile));
-	    for (String str : phrases) {
-		spellCheck(dict, trainedData, str, buffer);
-	    }
-	    buffer.close();
-	} catch (IOException e) {
-	    e.printStackTrace();
 	}
-    }
 
 }

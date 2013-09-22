@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,6 +31,18 @@ public class TrigramCheck {
 		wc=new WordCheck(trainedData);
 
 	}
+
+	private void insSpaces(String word, List<String> strList, String upto, int i) {
+		for (int j = i+2; j <= word.length(); j++) {
+			if(trainedData.hasWord(word.substring(i,j))){
+				if(j== word.length())
+					strList.add((upto+" "+word.substring(i,j)).trim());
+				else
+					insSpaces(word, strList, (upto+" "+word.substring(i,j)).trim(), j);
+			}
+		}
+	}
+	
 	/**
 	 * 
 	 * @param word word to be corrected
@@ -42,8 +55,20 @@ public class TrigramCheck {
 		System.err.println(history + " [" + word +"] " + nextWord);
 
 		Map<String, Double> possiableWords = wc.getCorrect(word);
-		Map<String, Double> trigram = new HashMap<String, Double>();
 		Map<String, Double> validWords; 
+		
+		if(possiableWords.isEmpty()) {
+			List<String> strList = new LinkedList<String>();
+			String upto = "";
+			insSpaces(word,strList,upto,0);
+			validWords = possiableWords; 
+			for (String string : strList) {
+				validWords.put(string, Double.MIN_VALUE);
+			}
+			return normalize(validWords);
+		}
+		
+		Map<String, Double> trigram = new HashMap<String, Double>();
 		for (Map.Entry<String, Double> entry : possiableWords.entrySet())
 		{			
 			trigram.put(history.trim()+" "+entry.getKey(),Double.MIN_VALUE);
@@ -52,6 +77,7 @@ public class TrigramCheck {
 		validWords=sortByValue(validWords);
 		return normalize(validWords);
 	}
+
 
 
 	private Map<String, Double> getScore(Map<String, Double> ngrams,

@@ -72,12 +72,12 @@ public class PhraseSpellCheck {
 				Map<String, Double> map = trigramCheck.getCorrect(
 						curr_word,trigrams.toString().trim(),next);
 
-				buffer.write("[");
+				buffer.write("[ ");
 				for (String string : map.keySet()) {
 					String score = String.format("%.2f",map.get(string)*100);
-					buffer.write(string+"  <"+ score +">\t");
+					buffer.write(string+"  <"+ score +">  ");
 				}
-				buffer.write("]");
+				buffer.write("] ");
 				
 			} else {
 				buffer.write(curr_word +" ");
